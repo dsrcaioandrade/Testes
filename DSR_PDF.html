@@ -801,7 +801,7 @@ function renderSplitRanges() {
   updateSplitTip();
   splitRanges.forEach((r,i)=>{
     const row=document.createElement('div'); row.className='range-row';
-    row.innerHTML='<div class="range-label">Parte '+(i+1)+'</div><span>P\u00e1ginas</span><input type="number" min="1" max="'+(splitTotalPages||9999)+'" value="'+r.from+'" onchange="updateRange('+i+','from',this.value)" style="width:64px;text-align:center"><span>at\u00e9</span><input type="number" min="1" max="'+(splitTotalPages||9999)+'" value="'+r.to+'" onchange="updateRange('+i+','to',this.value)" style="width:64px;text-align:center"><button class="btn-remove" onclick="removeSplitRange('+i+')" '+(splitRanges.length<=1?'disabled':'')+'>\u2715</button>';
+    row.innerHTML=`<div class="range-label">Parte ${i+1}</div><span>P\u00e1ginas</span><input type="number" min="1" max="${splitTotalPages||9999}" value="${r.from}" onchange="updateRange(${i},'from',this.value)" style="width:64px;text-align:center"><span>at\u00e9</span><input type="number" min="1" max="${splitTotalPages||9999}" value="${r.to}" onchange="updateRange(${i},'to',this.value)" style="width:64px;text-align:center"><button class="btn-remove" onclick="removeSplitRange(${i})" ${splitRanges.length<=1?'disabled':''}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
     list.appendChild(row);
   });
 }
