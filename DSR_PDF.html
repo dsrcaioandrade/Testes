@@ -220,7 +220,7 @@ select:focus,input[type=text]:focus{border-color:var(--accent)}
     </div>
     <div class="download-tip" id="coversTip">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      <span>Ao gerar <strong>mais de um arquivo</strong>, cada PDF abre em uma aba separada. Se o navegador bloquear, permita pop-ups para esta página.</span>
+      <span>Ao baixar <strong>mais de um arquivo</strong>, o Chrome pode exibir uma notificação pedindo permissão para múltiplos downloads — clique em <strong>Permitir</strong> para continuar.</span>
     </div>
     <button class="btn-action" id="coversBtn" onclick="generateCovers()" disabled>
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v10m0 0l-3-3m3 3l3-3M3 17v2a2 2 0 002 2h14a2 2 0 002-2v-2"/></svg>
@@ -315,7 +315,7 @@ select:focus,input[type=text]:focus{border-color:var(--accent)}
       </div>
       <div class="download-tip" id="splitTip">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <span>Ao gerar <strong>mais de um arquivo</strong>, cada PDF abre em uma aba separada. Se o navegador bloquear, permita pop-ups para esta página.</span>
+        <span>Ao gerar <strong>mais de um arquivo</strong>, o Chrome pode exibir uma notificação pedindo permissão para múltiplos downloads — clique em <strong>Permitir</strong> para continuar.</span>
       </div>
       <button class="btn-action ready" id="splitBtn" onclick="splitPDF()">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 3h5v5"/><path d="M8 21H3v-5"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
@@ -343,19 +343,10 @@ function switchTab(name) {
 function slugify(t) { return t.replace(/[^a-zA-Z0-9\u00C0-\u00FF\s]/g,'').trim().replace(/\s+/g,'_').substring(0,60)||'documento'; }
 function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function downloadBytes(bytes, filename) {
-  // blob: URLs get a null origin inside SharePoint/OneDrive sandboxed iframes and
-  // are blocked by the browser. A base64 data URI is self-contained and has no
-  // origin, so it works in any sandboxed context.
-  let binary = '';
-  const chunk = 8192;
-  for (let i = 0; i < bytes.length; i += chunk)
-    binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
-  const dataUri = 'data:application/pdf;base64,' + btoa(binary);
-  const win = window.open(dataUri, '_blank');
-  if (!win) {
-    // popup blocked — fallback: anchor download
-    const a = document.createElement('a'); a.href=dataUri; a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  }
+  const blob = new Blob([bytes], {type:'application/pdf'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=filename; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url), 8000);
 }
 function showProgress(fillId, wrapId, pct) {
   const w = document.getElementById(wrapId); if(w) w.style.display='block';
