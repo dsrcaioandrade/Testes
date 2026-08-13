@@ -343,16 +343,19 @@ function switchTab(name) {
 function slugify(t) { return t.replace(/[^a-zA-Z0-9\u00C0-\u00FF\s]/g,'').trim().replace(/\s+/g,'_').substring(0,60)||'documento'; }
 function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function downloadBytes(bytes, filename) {
-  const blob = new Blob([bytes], {type:'application/pdf'});
-  const url = URL.createObjectURL(blob);
-  // a.click() is silently blocked inside SharePoint/OneDrive iframes;
-  // window.open escapes the sandbox and works in both local and hosted contexts.
-  const win = window.open(url, '_blank');
+  // blob: URLs get a null origin inside SharePoint/OneDrive sandboxed iframes and
+  // are blocked by the browser. A base64 data URI is self-contained and has no
+  // origin, so it works in any sandboxed context.
+  let binary = '';
+  const chunk = 8192;
+  for (let i = 0; i < bytes.length; i += chunk)
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+  const dataUri = 'data:application/pdf;base64,' + btoa(binary);
+  const win = window.open(dataUri, '_blank');
   if (!win) {
-    // popup blocked — fallback to direct download
-    const a = document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    // popup blocked — fallback: anchor download
+    const a = document.createElement('a'); a.href=dataUri; a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a);
   }
-  setTimeout(()=>URL.revokeObjectURL(url), 30000);
 }
 function showProgress(fillId, wrapId, pct) {
   const w = document.getElementById(wrapId); if(w) w.style.display='block';
