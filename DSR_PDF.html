@@ -220,7 +220,7 @@ select:focus,input[type=text]:focus{border-color:var(--accent)}
     </div>
     <div class="download-tip" id="coversTip">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      <span>Ao baixar <strong>mais de um arquivo</strong>, o Chrome pode exibir uma notificação pedindo permissão para múltiplos downloads — clique em <strong>Permitir</strong> para continuar.</span>
+      <span>Ao gerar <strong>mais de um arquivo</strong>, cada PDF abre em uma aba separada. Se o navegador bloquear, permita pop-ups para esta página.</span>
     </div>
     <button class="btn-action" id="coversBtn" onclick="generateCovers()" disabled>
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v10m0 0l-3-3m3 3l3-3M3 17v2a2 2 0 002 2h14a2 2 0 002-2v-2"/></svg>
@@ -315,7 +315,7 @@ select:focus,input[type=text]:focus{border-color:var(--accent)}
       </div>
       <div class="download-tip" id="splitTip">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <span>Ao gerar <strong>mais de um arquivo</strong>, o Chrome pode exibir uma notificação pedindo permissão para múltiplos downloads — clique em <strong>Permitir</strong> para continuar.</span>
+        <span>Ao gerar <strong>mais de um arquivo</strong>, cada PDF abre em uma aba separada. Se o navegador bloquear, permita pop-ups para esta página.</span>
       </div>
       <button class="btn-action ready" id="splitBtn" onclick="splitPDF()">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 3h5v5"/><path d="M8 21H3v-5"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
@@ -345,8 +345,14 @@ function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replac
 function downloadBytes(bytes, filename) {
   const blob = new Blob([bytes], {type:'application/pdf'});
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href=url; a.download=filename; a.click();
-  setTimeout(()=>URL.revokeObjectURL(url), 8000);
+  // a.click() is silently blocked inside SharePoint/OneDrive iframes;
+  // window.open escapes the sandbox and works in both local and hosted contexts.
+  const win = window.open(url, '_blank');
+  if (!win) {
+    // popup blocked — fallback to direct download
+    const a = document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  }
+  setTimeout(()=>URL.revokeObjectURL(url), 30000);
 }
 function showProgress(fillId, wrapId, pct) {
   const w = document.getElementById(wrapId); if(w) w.style.display='block';
