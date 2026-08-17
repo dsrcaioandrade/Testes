@@ -189,8 +189,8 @@ async def consultar_playwright(cpf: str, data_nascimento: str) -> dict | None:
 # ── Entrada principal ─────────────────────────────────────────────────────────
 
 def main():
-    cpf = input('CPF (apenas números ou formatado): ').strip() or '01579823270'
-    dob = input('Data de nascimento (ddmmaaaa ou dd/mm/aaaa): ').strip() or '02121991'
+    cpf = input('CPF (apenas números ou formatado): ').strip()
+    dob = input('Data de nascimento (ddmmaaaa ou dd/mm/aaaa): ').strip()
 
     print(f'\nConsultando CPF {cpf}...\n')
 
